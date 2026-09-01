@@ -104,8 +104,12 @@
   .case-strip b{ color:var(--ink); }
   .case-strip .linklike{ margin-left:auto; }
 
-  .grid{ display:grid; grid-template-columns: 1fr 380px; gap:22px; align-items:start; }
-  @media (max-width:920px){ .grid{ grid-template-columns:1fr; } .summary-col{ order:-1; } }
+  .flow{ display:flex; flex-direction:column; }
+  .section-title{ font-size:16px; display:flex; align-items:baseline; gap:9px; margin:30px 0 14px; font-family:"Noto Serif KR",serif; font-weight:700; padding-top:18px; border-top:1px solid var(--line-strong); }
+  .section-title .n{ color:var(--seal); font-family:"IBM Plex Mono",monospace; font-size:14px; }
+  .results-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-bottom:16px; }
+  .results-grid > .span2{ grid-column:1/-1; }
+  @media (max-width:760px){ .results-grid{ grid-template-columns:1fr; } }
 
   .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px 20px; box-shadow:var(--shadow); margin-bottom:16px; }
   .card h2{ font-size:15px; display:flex; align-items:baseline; gap:9px; margin-bottom:3px; }
@@ -144,7 +148,7 @@
   details.adv[open] > summary:before{ transform:rotate(90deg); }
   details.adv .adv-body{ padding-top:10px; }
 
-  .summary-col{ position:sticky; top:20px; display:flex; flex-direction:column; gap:16px; }
+  .summary-col{ display:flex; flex-direction:column; gap:16px; max-width:760px; margin:0 auto; }
   .headline{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 20px 18px; }
   .headline .label{ font-size:12px; color:var(--ink-faint); font-weight:600; letter-spacing:.02em; }
   .headline .amount{ font-size:32px; font-weight:700; color:var(--seal); margin:6px 0 2px; line-height:1.1; word-break:break-word; }
@@ -202,7 +206,6 @@
   @media (max-width:920px){
     .field-row{ grid-template-columns:1fr; }
     .field-row.cols3{ grid-template-columns:1fr; }
-    .summary-col{ position:static; }
     header.top{ flex-direction:column; }
     .asof{ text-align:left; }
   }
@@ -280,8 +283,8 @@
       아래 계산은 <b>현행법(자녀공제 5천만원, 최고세율 50%)</b>을 기준으로 하며, 유산취득세 전환 등 구조 개편안 역시 2026년 9월 현재 입법예고 단계로 시행되지 않았습니다.
     </div>
 
-    <div class="grid">
-      <!-- LEFT: INPUTS -->
+    <div class="flow">
+      <!-- STEP 1: DETAILED INPUTS -->
       <div class="inputs-col">
 
         <div class="card">
@@ -500,8 +503,10 @@
 
       </div>
 
-      <!-- RIGHT: SUMMARY -->
+      <!-- STEP 2: CALCULATION RESULT -->
       <div class="summary-col">
+        <h2 class="section-title"><span class="n">07</span> 계산 결과</h2>
+
         <div class="headline">
           <div class="label">예상 납부세액 (자진신고 기준)</div>
           <div class="amount num" id="out-finalTax">0원</div>
@@ -512,47 +517,52 @@
           </div>
         </div>
 
-        <div class="ledger">
-          <h3>세액 계산 내역</h3>
-          <div class="ledger-row"><div class="k">총 상속재산가액</div><div class="v" id="l-total">0</div></div>
-          <div class="ledger-row neg"><div class="k">(-) 비과세·공과금·장례비·채무</div><div class="v" id="l-minus1">0</div></div>
-          <div class="ledger-row pos"><div class="k">(+) 사전증여재산 가산</div><div class="v" id="l-giftadd">0</div></div>
-          <div class="ledger-row total"><div class="k">상속세 과세가액</div><div class="v" id="l-taxbase0">0</div></div>
-          <div class="ledger-row neg"><div class="k">(-) 상속공제 합계<span class="sub" id="l-deduction-note"></span></div><div class="v" id="l-deduction">0</div></div>
-          <div class="ledger-row total"><div class="k">과세표준</div><div class="v" id="l-base">0</div></div>
-          <div class="ledger-row"><div class="k">산출세액 (세율 적용)</div><div class="v" id="l-calctax">0</div></div>
-          <div class="ledger-row pos" id="row-skipgen" style="display:none;"><div class="k">(+) 세대생략 할증</div><div class="v" id="l-skipgen">0</div></div>
-          <div class="ledger-row neg"><div class="k">(-) 신고세액공제 (3%)</div><div class="v" id="l-reportcredit">0</div></div>
-          <div class="ledger-row neg"><div class="k">(-) 기납부 증여세액공제</div><div class="v" id="l-giftcredit">0</div></div>
-          <div class="ledger-row total"><div class="k">납부할 세액</div><div class="v" id="l-final">0</div></div>
-        </div>
+        <div class="results-grid">
+          <div class="ledger span2">
+            <h3>세액 계산 내역</h3>
+            <div class="ledger-row"><div class="k">총 상속재산가액</div><div class="v" id="l-total">0</div></div>
+            <div class="ledger-row neg"><div class="k">(-) 비과세·공과금·장례비·채무</div><div class="v" id="l-minus1">0</div></div>
+            <div class="ledger-row pos"><div class="k">(+) 사전증여재산 가산</div><div class="v" id="l-giftadd">0</div></div>
+            <div class="ledger-row total"><div class="k">상속세 과세가액</div><div class="v" id="l-taxbase0">0</div></div>
+            <div class="ledger-row neg"><div class="k">(-) 상속공제 합계<span class="sub" id="l-deduction-note"></span></div><div class="v" id="l-deduction">0</div></div>
+            <div class="ledger-row total"><div class="k">과세표준</div><div class="v" id="l-base">0</div></div>
+            <div class="ledger-row"><div class="k">산출세액 (세율 적용)</div><div class="v" id="l-calctax">0</div></div>
+            <div class="ledger-row pos" id="row-skipgen" style="display:none;"><div class="k">(+) 세대생략 할증</div><div class="v" id="l-skipgen">0</div></div>
+            <div class="ledger-row neg"><div class="k">(-) 신고세액공제 (3%)</div><div class="v" id="l-reportcredit">0</div></div>
+            <div class="ledger-row neg"><div class="k">(-) 기납부 증여세액공제</div><div class="v" id="l-giftcredit">0</div></div>
+            <div class="ledger-row total"><div class="k">납부할 세액</div><div class="v" id="l-final">0</div></div>
+          </div>
 
-        <div class="ledger">
-          <h3>상속공제 구성</h3>
-          <div class="bar-stack" id="deductionBar"></div>
-          <div class="bar-legend" id="deductionLegend"></div>
-        </div>
+          <div class="ledger">
+            <h3>상속공제 구성</h3>
+            <div class="bar-stack" id="deductionBar"></div>
+            <div class="bar-legend" id="deductionLegend"></div>
+          </div>
 
-        <div class="ledger">
-          <h3>상속세 세율표</h3>
-          <table class="bracket-table" id="bracketTable">
-            <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
+          <div class="ledger">
+            <h3>상속세 세율표</h3>
+            <table class="bracket-table" id="bracketTable">
+              <thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
 
-        <div class="ledger">
-          <h3>적용 법령 근거</h3>
-          <div class="law-list" id="lawList"></div>
+          <div class="ledger span2">
+            <h3>적용 법령 근거</h3>
+            <div class="law-list" id="lawList"></div>
+          </div>
         </div>
 
         <div class="flash-note">
           <b>유의사항 —</b> 본 계산기는 상속공제 종합한도(§24), 배우자 법정상속분(민법상 특별수익 조정 미반영), 가업상속공제 사후관리요건 등을 단순화한 참고용 시뮬레이터입니다. 실제 신고세액은 재산 평가방법과 개별 사실관계에 따라 달라지므로 반드시 세부 검토를 거쳐 확정하시기 바랍니다.
         </div>
+      </div>
 
-        <div class="ledger">
-          <h3>상담신청 접수</h3>
-          <p class="desc" style="margin-bottom:10px; font-size:12px; color:var(--ink-faint);">아래 버튼을 누르면 입력하신 모든 내용과 계산 결과가 담당 세무사에게 자동으로 접수됩니다.</p>
+      <!-- STEP 3: CONSULTATION REQUEST (last) -->
+      <div class="summary-col">
+        <h2 class="section-title"><span class="n">08</span> 상담신청 접수</h2>
+        <div class="card" style="margin-bottom:0;">
+          <p class="desc" style="margin-bottom:10px; font-size:12.5px;">아래 버튼을 누르면 입력하신 모든 내용과 계산 결과가 담당 세무사에게 자동으로 접수됩니다.</p>
           <button type="button" class="primary-btn good" id="submitSheetBtn">📝 상담신청 접수하기</button>
           <div class="krw-echo" id="sheet-status"></div>
         </div>
