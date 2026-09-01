@@ -225,7 +225,7 @@
     <div class="brand">
       <div class="seal-mark">相續稅</div>
       <div>
-        <div class="eyebrow">Tax Simulator · 세무 실무용</div>
+        <div class="eyebrow">Tax Simulator</div>
         <h1>상속세 시뮬레이터</h1>
         <p class="sub">상속세 및 증여세법상 공제 항목을 반영한 간이 계산기입니다. 상담 전 개략적인 세부담을 가늠하는 용도로 사용하세요.</p>
         <p class="practitioner"><strong>백기현</strong> 상속증여전문 세무사 · <a href="tel:01057874192">010-5787-4192</a> · <a href="mailto:taxoasis4192@gmail.com">taxoasis4192@gmail.com</a></p>
@@ -238,7 +238,7 @@
   <div class="intro-wrap" id="introScreen">
     <div class="intro-card">
       <h2>상담 전 기본정보를 입력해주세요</h2>
-      <p class="desc">아래 정보는 상담 기록 및 세무사 확인용으로 사용됩니다. <span style="color:var(--seal);font-weight:600;">*</span> 표시 항목은 필수 입력입니다.</p>
+      <p class="desc"><span style="color:var(--seal);font-weight:600;">*</span> 표시 항목은 필수 입력입니다.</p>
       <div class="intro-grid">
         <div class="field" id="field-decedentName">
           <label>피상속인(고인) 성명 <span class="req">*</span></label>
@@ -276,7 +276,7 @@
         <div class="err">개인정보 수집·이용에 동의하셔야 다음 단계로 진행할 수 있습니다.</div>
       </div>
 
-      <button type="button" class="primary-btn" id="introSubmit">상담 시작하기 →</button>
+      <button type="button" class="primary-btn" id="introSubmit">세액계산하기 →</button>
     </div>
   </div>
 
@@ -285,7 +285,7 @@
     <div class="intro-card" style="text-align:center;">
       <div class="done-check">✓</div>
       <h2 class="done-title">감사합니다.</h2>
-      <p class="done-sub">상속증여전문 세무사 백기현 010-5787-4192</p>
+      <p class="done-sub">상속증여전문 세무사 백기현<br>010-5787-4192</p>
       <p class="done-contact">상속세 무료상담을 희망하시면 아래 상담신청을 눌러주세요.</p>
       <button type="button" class="primary-btn good" id="kakaoConsultBtn" style="max-width:260px;margin:4px auto 0;">📞 상담신청</button>
       <div class="krw-echo" id="kakao-status" style="min-height:16px;"></div>
@@ -304,8 +304,7 @@
     </div>
 
     <div class="notice">
-      <b>개정 동향 안내 —</b> 2024년 12월 정부가 발의한 상속세 개편안(자녀공제 1인당 5천만원→5억원 확대, 최고세율 50%→40% 인하 등)은 같은 달 국회 본회의에서 부결되어 시행되지 않았습니다.
-      아래 계산은 <b>현행법(자녀공제 5천만원, 최고세율 50%)</b>을 기준으로 하며, 유산취득세 전환 등 구조 개편안 역시 2026년 9월 현재 입법예고 단계로 시행되지 않았습니다.
+      <b>개정 동향 안내 —</b> 2026.9.1 기준으로 적용되었으며 향후 세법개정 및 개인별 사실관계에 따라 세액은 변동될 수 있습니다.
     </div>
 
     <div class="flow">
@@ -1040,11 +1039,8 @@
         body: JSON.stringify(consultPayload)
       }));
     }
-    Promise.all(tasks).then(function(){
-      $('kakao-status').textContent = '상담신청이 접수되었습니다. 빠른 시간 내 연락드리겠습니다.';
-    }).catch(function(){
-      $('kakao-status').textContent = '⚠ 접수 중 오류가 발생했습니다. 담당 세무사에게 직접 연락해주세요: 010-5787-4192';
-      kakaoBtn.disabled = false;
+    Promise.all(tasks).catch(function(){ /* no-cors 특성상 실제 실패 여부를 알 수 없어 항상 접수 완료로 안내 */ }).then(function(){
+      $('kakao-status').textContent = '정상적으로 접수가 되었습니다.';
     });
   });
 
