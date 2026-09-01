@@ -69,6 +69,10 @@
   .intro-card .desc{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
   .intro-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; }
   @media (max-width:560px){ .intro-grid{ grid-template-columns:1fr; } }
+  .consent-box{ background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:6px 0 16px; }
+  .consent-box.invalid{ border-color:var(--error); }
+  .consent-box .consent-text{ font-size:10.8px; line-height:1.65; color:var(--ink-faint); max-height:96px; overflow-y:auto; margin-bottom:10px; padding-right:4px; }
+  .consent-box .consent-text b{ color:var(--ink-soft); }
   .field{ display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
   .field label{ font-size:12.5px; color:var(--ink-soft); font-weight:500; display:flex; justify-content:space-between; gap:6px;}
   .field label .tag{ font-size:10.5px; color:var(--ink-faint); font-weight:400; }
@@ -110,6 +114,9 @@
   .results-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-bottom:16px; }
   .results-grid > .span2{ grid-column:1/-1; }
   @media (max-width:760px){ .results-grid{ grid-template-columns:1fr; } }
+  .calc-cta{ text-align:center; margin:6px 0 34px; }
+  .calc-cta .primary-btn{ max-width:360px; margin:0 auto; padding:15px 18px; font-size:15.5px; }
+  .calc-cta .hint{ margin-top:9px; text-align:center; }
 
   .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px 20px; box-shadow:var(--shadow); margin-bottom:16px; }
   .card h2{ font-size:15px; display:flex; align-items:baseline; gap:9px; margin-bottom:3px; }
@@ -253,6 +260,22 @@
           <div class="err">연락처를 정확히 입력해주세요 (숫자만).</div>
         </div>
       </div>
+
+      <div class="field consent-box" id="field-agreePrivacy">
+        <div class="consent-text">
+          <b>[필수] 개인정보 수집·이용 동의</b><br>
+          · 수집 항목: 성명, 연락처, 상속개시일 및 상속세 시뮬레이션을 위해 입력하신 재산·채무 등 정보<br>
+          · 수집 목적: 상속세 예상세액 시뮬레이션 제공 및 세무 상담 진행<br>
+          · 보유·이용 기간: 상담 종료 후 3년 (관련 법령상 별도 보관 의무가 있는 경우 해당 기간까지)<br>
+          · 동의를 거부하실 수 있으며, 거부 시 계산 결과 확인 및 상담 서비스 이용이 제한됩니다.
+        </div>
+        <div class="check-row" style="margin:0;">
+          <input type="checkbox" id="agreePrivacy">
+          <label for="agreePrivacy" style="margin:0; font-size:12.8px;">위 개인정보 수집·이용에 동의합니다 <span class="req">*</span></label>
+        </div>
+        <div class="err">개인정보 수집·이용에 동의하셔야 다음 단계로 진행할 수 있습니다.</div>
+      </div>
+
       <button type="button" class="primary-btn" id="introSubmit">상담 시작하기 →</button>
     </div>
   </div>
@@ -262,9 +285,11 @@
     <div class="intro-card" style="text-align:center;">
       <div class="done-check">✓</div>
       <h2 class="done-title">감사합니다.</h2>
-      <p class="done-sub">상담신청이 정상적으로 접수되었습니다.</p>
-      <p class="done-contact">세무사 백기현 010-5787-4192</p>
-      <button type="button" class="secondary-btn" id="restartBtn" style="max-width:220px;margin:0 auto;">새 상담 작성하기</button>
+      <p class="done-sub">상속증여전문 세무사 백기현 010-5787-4192</p>
+      <p class="done-contact">상속세 무료상담을 희망하시면 아래 상담신청을 눌러주세요.</p>
+      <button type="button" class="primary-btn good" id="kakaoConsultBtn" style="max-width:260px;margin:4px auto 0;">📞 상담신청</button>
+      <div class="krw-echo" id="kakao-status" style="min-height:16px;"></div>
+      <button type="button" class="secondary-btn" id="restartBtn" style="max-width:220px;margin:14px auto 0;">새 상담 작성하기</button>
     </div>
   </div>
 
@@ -503,8 +528,13 @@
 
       </div>
 
-      <!-- STEP 2: CALCULATION RESULT -->
-      <div class="summary-col">
+      <div class="calc-cta">
+        <button type="button" class="primary-btn" id="calcBtn">📊 예상세액계산하기</button>
+        <p class="hint">입력하신 내용을 바탕으로 예상 상속세액을 계산합니다.</p>
+      </div>
+
+      <!-- STEP 2: CALCULATION RESULT (hidden until 예상세액계산하기 클릭) -->
+      <div class="summary-col" id="resultsSection" style="display:none;">
         <h2 class="section-title"><span class="n">07</span> 계산 결과</h2>
 
         <div class="headline">
@@ -556,15 +586,10 @@
         <div class="flash-note">
           <b>유의사항 —</b> 본 계산기는 상속공제 종합한도(§24), 배우자 법정상속분(민법상 특별수익 조정 미반영), 가업상속공제 사후관리요건 등을 단순화한 참고용 시뮬레이터입니다. 실제 신고세액은 재산 평가방법과 개별 사실관계에 따라 달라지므로 반드시 세부 검토를 거쳐 확정하시기 바랍니다.
         </div>
-      </div>
 
-      <!-- STEP 3: CONSULTATION REQUEST (last) -->
-      <div class="summary-col">
-        <h2 class="section-title"><span class="n">08</span> 상담신청 접수</h2>
-        <div class="card" style="margin-bottom:0;">
-          <p class="desc" style="margin-bottom:10px; font-size:12.5px;">아래 버튼을 누르면 입력하신 모든 내용과 계산 결과가 담당 세무사에게 자동으로 접수됩니다.</p>
-          <button type="button" class="primary-btn good" id="submitSheetBtn">📝 상담신청 접수하기</button>
-          <div class="krw-echo" id="sheet-status"></div>
+        <div class="card" style="text-align:center; margin-bottom:0;">
+          <p class="desc" style="margin-bottom:10px; font-size:12.5px;">계산 결과를 확인하셨다면, 정확한 절세 방안에 대해 무료로 상담받아보세요.</p>
+          <button type="button" class="primary-btn good" id="goConsultBtn">무료 상담 신청하기 →</button>
         </div>
       </div>
     </div>
@@ -664,13 +689,14 @@
   function setFieldError(id){ const f=$('field-'+id); if(f) f.classList.add('invalid'); }
   function validateIntro(){
     let ok = true;
-    ['decedentName','heirName','heirPhone'].forEach(clearFieldError);
+    ['decedentName','heirName','heirPhone','agreePrivacy'].forEach(clearFieldError);
     const decedent = $('decedentName').value.trim();
     const heir = $('heirName').value.trim();
     const phoneDigits = $('heirPhone').dataset.raw || $('heirPhone').value.replace(/\D/g,'');
     if(!decedent){ setFieldError('decedentName'); ok=false; }
     if(!heir){ setFieldError('heirName'); ok=false; }
     if(!phoneDigits || phoneDigits.length<10){ setFieldError('heirPhone'); ok=false; }
+    if(!$('agreePrivacy').checked){ setFieldError('agreePrivacy'); ok=false; }
     return ok;
   }
   function showApp(){
@@ -687,6 +713,7 @@
   $('introSubmit').addEventListener('click', function(){ if(validateIntro()) showApp(); });
   ['decedentName','heirName'].forEach(id=>{ $(id).addEventListener('input', ()=>clearFieldError(id)); });
   $('heirPhone').addEventListener('input', ()=>clearFieldError('heirPhone'));
+  $('agreePrivacy').addEventListener('change', ()=>clearFieldError('agreePrivacy'));
   $('editIntro').addEventListener('click', function(){
     $('appScreen').style.display='none'; $('introScreen').style.display='';
     window.scrollTo({top:0, behavior:'smooth'});
@@ -970,26 +997,54 @@
     };
   }
 
-  /* ---------- 상담신청: 구글시트 자동 저장 ---------- */
-  const sheetBtn = $('submitSheetBtn');
-  sheetBtn.addEventListener('click', function(){
-    if(!lastPayload) recompute();
-    if(!SHEET_WEBHOOK_URL){
-      $('sheet-status').textContent = '⚠ 자동 저장 연동이 아직 설정되지 않았습니다. 담당 세무사에게 문의해주세요: 010-5787-4192';
-      return;
+  /* ---------- 예상세액계산하기: 결과 노출 + 구글시트에 조용히 저장(고객에게 비노출) ---------- */
+  const calcBtn = $('calcBtn');
+  calcBtn.addEventListener('click', function(){
+    recompute();
+    const results = $('resultsSection');
+    results.style.display = '';
+    results.scrollIntoView({behavior:'smooth', block:'start'});
+    if(SHEET_WEBHOOK_URL){
+      fetch(SHEET_WEBHOOK_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(Object.assign({event:'calc'}, lastPayload))
+      }).catch(function(){ /* 고객에게는 저장 성공/실패를 노출하지 않음 */ });
     }
-    sheetBtn.disabled = true;
-    $('sheet-status').textContent = '상담신청을 접수하는 중입니다...';
-    fetch(SHEET_WEBHOOK_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(lastPayload)
-    }).then(function(){
-      $('sheet-status').textContent = '';
-      showDone();
+  });
+
+  $('goConsultBtn').addEventListener('click', function(){ showDone(); });
+
+  /* ---------- 마지막 페이지 "상담신청": 담당 세무사에게 알림 ---------- */
+  /* KAKAO_WEBHOOK_URL: Apps Script 등에서 카카오 메시지 API로 중계하는 웹훅을 넣으면
+     상담신청 클릭 시 담당 세무사 카카오톡으로도 자동 전달됩니다. 비워두면 구글시트 기록만 됩니다. */
+  const KAKAO_WEBHOOK_URL = "";
+  const kakaoBtn = $('kakaoConsultBtn');
+  kakaoBtn.addEventListener('click', function(){
+    if(!lastPayload) recompute();
+    kakaoBtn.disabled = true;
+    $('kakao-status').textContent = '상담신청을 접수하는 중입니다...';
+    const consultPayload = Object.assign({event:'consult_request', consultRequestedAt:new Date().toISOString()}, lastPayload);
+    const tasks = [];
+    if(SHEET_WEBHOOK_URL){
+      tasks.push(fetch(SHEET_WEBHOOK_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(consultPayload)
+      }));
+    }
+    if(KAKAO_WEBHOOK_URL){
+      tasks.push(fetch(KAKAO_WEBHOOK_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(consultPayload)
+      }));
+    }
+    Promise.all(tasks).then(function(){
+      $('kakao-status').textContent = '상담신청이 접수되었습니다. 빠른 시간 내 연락드리겠습니다.';
     }).catch(function(){
-      $('sheet-status').textContent = '⚠ 접수 중 오류가 발생했습니다. 담당 세무사에게 직접 연락해주세요: 010-5787-4192';
-      sheetBtn.disabled = false;
+      $('kakao-status').textContent = '⚠ 접수 중 오류가 발생했습니다. 담당 세무사에게 직접 연락해주세요: 010-5787-4192';
+      kakaoBtn.disabled = false;
     });
   });
 
